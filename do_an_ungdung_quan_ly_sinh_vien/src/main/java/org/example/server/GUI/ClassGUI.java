@@ -1,6 +1,6 @@
-package org.example.server.classes;
+package org.example.server.GUI;
 
-import org.example.database_config;
+import org.example.server.config.DatabaseConfig;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -8,17 +8,17 @@ import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 
-public class class_gui extends JFrame {
+public class ClassGUI extends JFrame {
 
     private JTable classTable;
     private DefaultTableModel tableModel;
-    private final database_config dbConfig;
+    private final DatabaseConfig dbConfig;
     private JTextField idField;
     private JTextField classname;
 
 
-    public class_gui() {
-        dbConfig = new database_config();
+    public ClassGUI() {
+        dbConfig = new DatabaseConfig();
 
         setTitle("Quản lý lớp học");
         setSize(800, 400);

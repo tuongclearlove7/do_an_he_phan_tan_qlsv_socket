@@ -1,20 +1,28 @@
-package org.example.server.classes;
+package org.example.server.DAL;
 
-import org.example.server.interface_socket_server;
-import org.example.server.socket_server;
+import org.example.server.service.handle.MessageHandler;
+import org.example.server.service.SocketServerService;
+import org.example.server.socket.Socket;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class class_message implements interface_socket_server {
+public class class_message implements SocketServerService {
 
 
-    private socket_server socket_server;
+    private MessageHandler messageHandler;
+    private Socket Socket;
 
-    public class_message() {
-        socket_server = new socket_server();
+
+    public class_message(MessageHandler messageHandler) {
+        this.messageHandler = messageHandler;
+    }
+
+    public class_message(){
+
     }
 
     @Override
@@ -33,8 +41,9 @@ public class class_message implements interface_socket_server {
     }
 
     @Override
-    public void handleStudentMessage(String SQL, Connection conn) throws SQLException {
+    public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {
         PreparedStatement preparedStatement = conn.prepareStatement(SQL);
+        preparedStatement.setString(1, param);
         ResultSet resultSet = preparedStatement.executeQuery();
         StringBuilder str = new StringBuilder();
 
@@ -48,6 +57,6 @@ public class class_message implements interface_socket_server {
             .append(id).append(", Class name: ")
             .append(name);
         }
-        socket_server.sendMessageToClient(String.valueOf(str));
+        messageHandler.sendMessageToClient(String.valueOf(str));
     }
 }

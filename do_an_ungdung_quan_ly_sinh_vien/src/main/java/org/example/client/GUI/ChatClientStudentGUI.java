@@ -1,16 +1,14 @@
-package org.example.client;
+package org.example.client.GUI;
 
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.net.Socket;
 
-public class ChatClientStudentApp extends JFrame {
+public class ChatClientStudentGUI extends JFrame {
     private final JTextField messageField;
     private final JTextArea chatArea;
     private JButton sendButton;
@@ -20,7 +18,7 @@ public class ChatClientStudentApp extends JFrame {
     private final String hostName = "localhost";
     private final int port = 2000;
 
-    public ChatClientStudentApp() {
+    public ChatClientStudentGUI() {
 
         setTitle("Chat Client");
         setSize(600, 400);
@@ -97,6 +95,7 @@ public class ChatClientStudentApp extends JFrame {
             try {
                 String response;
                 while ((response = reader.readLine()) != null) {
+                    System.out.println(response);
                     if(!response.isEmpty()){
                         chatArea.append("Server: " + response + "\n");
                     }
@@ -108,7 +107,7 @@ public class ChatClientStudentApp extends JFrame {
     }
 
     public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> new ChatClientStudentApp().setVisible(true));
+        SwingUtilities.invokeLater(() -> new ChatClientStudentGUI().setVisible(true));
     }
 }
 

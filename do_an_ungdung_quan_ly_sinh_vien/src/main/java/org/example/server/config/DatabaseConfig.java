@@ -1,27 +1,33 @@
-package org.example;
+package org.example.server.config;
 
+import org.example.server.GUI.StudentGUI;
+import org.example.server.service.MessageService;
+import org.example.server.service.SocketServerService;
+
+import javax.swing.*;
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.DriverManager;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 
 
-public class database_config implements database_interface {
-
-    private String connectString = "jdbc:mysql://localhost:3306/quanly_sinhvien";
-
-    private String username = "root";
-    private String password = "123456";
+public class DatabaseConfig {
 
 
-    public database_config(String connectString, String username, String password) {
+    private String connectString = EnvConfig.getDatabaseUrl();
+    private String username = EnvConfig.getDatabaseUsername();
+    private String password = EnvConfig.getDatabasePassword();
+    private MessageService messageService;
+
+    public DatabaseConfig(String connectString, String username, String password) {
         this.connectString = connectString;
         this.username = username;
         this.password = password;
     }
 
-    public database_config() {
+    public DatabaseConfig(){
+        this.messageService = new MessageService() {};
     }
 
     public String getConnectString() {
@@ -36,10 +42,10 @@ public class database_config implements database_interface {
         return password;
     }
 
-
-    @Override
     public Connection connect_database() {
         try {
+            messageService.initialMessage("\nConnection: " + getConnectString() + " database\n");
+
             System.out.println("Connection: "+getConnectString());
             return DriverManager.getConnection(getConnectString(), getUsername(), getPassword());
         } catch (SQLException e) {
