@@ -88,7 +88,12 @@ public class ChatClientStudentGUI extends JFrame {
         String message = messageField.getText();
         if (!message.isEmpty()) {
             writer.println(message);
-            chatArea.append("You: " + message + "\n");
+            if(message.equals("clear")){
+                writer.println();
+                chatArea.setText("");
+                new Thread(new ReceiveMessagesTask()).start();
+            }
+            chatArea.append("\nYou: " + message + "\n");
         }
     }
 
@@ -104,7 +109,7 @@ public class ChatClientStudentGUI extends JFrame {
                     }
                 }
             } catch (Exception e) {
-                chatArea.append("Error receiving message: " + e.getMessage() + "\n");
+                chatArea.append("Server not active: " + e.getMessage() + "\n");
             }
         }
     }
