@@ -10,6 +10,8 @@ import java.awt.event.ActionListener;
 
 public class ClassGUI extends JFrame {
 
+    //GUI (Graphic user interface)
+
     private JTable classTable;
     private DefaultTableModel tableModel;
     private final DatabaseConfig dbConfig;

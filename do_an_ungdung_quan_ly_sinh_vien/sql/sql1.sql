@@ -55,8 +55,10 @@ INSERT INTO points (id, point, note, student_id, class_id, subject_id) VALUES
 ('P003', 9.0, 'Excellent', 'S003', 'C003', 'SB003');
 
 SELECT * FROM students;
-SELECT * FROM students;
+SELECT * FROM classes;
 SELECT * FROM points;
+
+SELECT * FROM students WHERE fullname like '%Nguyen Van A%';
 
 SELECT * FROM students, points, classes, subjects
 WHERE students.id = points.student_id AND

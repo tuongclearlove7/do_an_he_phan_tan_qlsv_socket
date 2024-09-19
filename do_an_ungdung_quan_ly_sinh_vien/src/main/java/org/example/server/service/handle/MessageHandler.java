@@ -3,10 +3,13 @@ package org.example.server.service.handle;
 import org.example.server.config.DatabaseConfig;
 import org.example.server.GUI.StudentGUI;
 import org.example.server.DAL.class_message;
+import org.example.server.service.MessageService;
 import org.example.server.service.SocketServerService;
 import org.example.server.DAL.student_message;
+import org.example.server.service.UtilService;
 
 import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -16,6 +19,8 @@ import java.sql.SQLException;
 
 public class MessageHandler implements SocketServerService {
 
+    //Business logic layer
+
     private final Socket socket1;
     private BufferedReader reader;
     private BufferedWriter writer;
@@ -23,11 +28,20 @@ public class MessageHandler implements SocketServerService {
     private final class_message class_message;
     private final student_message student_message;
 
+    private UtilService utilService;
+    private MessageService messageService;
+
     public MessageHandler() {
         dbConfig = new DatabaseConfig();
         class_message = new class_message(this);
         student_message = new student_message(this);
         socket1 = new Socket();
+        messageService = new MessageService() {
+            @Override
+            public void initialMessage(String message) {
+                MessageService.super.initialMessage(message);
+            }
+        };
     }
 
     public void settings(BufferedReader reader, BufferedWriter writer) {
@@ -74,9 +88,7 @@ public class MessageHandler implements SocketServerService {
         if(message.isEmpty()){
             sendMessageToClient(String.valueOf(str));
         }else {
-            SwingUtilities.invokeLater(() -> {
-                StudentGUI.messageField.append("Client: " + message + "\n");
-            });
+            messageService.initialMessage("Client: " + message + "\n");
         }
     }
 

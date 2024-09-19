@@ -11,8 +11,11 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.sql.*;
+import java.time.LocalDateTime;
 
 public class student_message implements SocketServerService, StudentService, UtilService {
+
+    //Data access layer
 
     private Socket Socket;
     private MessageHandler messageHandler;
@@ -67,7 +70,7 @@ public class student_message implements SocketServerService, StudentService, Uti
     }
 
     @Override
-    public void create(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField) {
+    public void createStudent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField) throws SQLException {
         Connection conn = dbConfig.connect_database();
         if (conn != null) {
             try {
@@ -81,26 +84,43 @@ public class student_message implements SocketServerService, StudentService, Uti
 
                 tableModel.addRow(new Object[]{idField.getText(), fullnameField.getText(), birthdayField.getText()});
             } catch (SQLException e) {
-                e.printStackTrace();
+                throw e;
             }
         }
     }
 
     @Override
-    public void updateById(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, JTable studentTable) {
+    public void createStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, Runnable runnable) {
+
+    }
+
+    @Override
+    public void updateStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, JTable studentTable, Runnable runnable) {
+
+    }
+
+    @Override
+    public void deleteStudentEvent(DefaultTableModel tableModel, JTextField idField, JTable studentTable, Runnable runnable) {
+
+    }
+
+    @Override
+    public void updateStudentById(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, JTable studentTable) throws SQLException {
 
         Connection conn = dbConfig.connect_database();
         if (conn != null) {
             try {
                 int selectedRow = studentTable.getSelectedRow();
+                String oldFullName = tableModel.getValueAt(selectedRow, 1).toString();
+                String oldBirthday = tableModel.getValueAt(selectedRow, 2).toString();
                 if (selectedRow == -1) {
                     return;
                 }
-                String oldFullName = tableModel.getValueAt(selectedRow, 1).toString();
-                String oldBirthday = tableModel.getValueAt(selectedRow, 2).toString();
                 String newFullName = fullnameField.getText().isEmpty() ? oldFullName : fullnameField.getText();
                 String newBirthday = birthdayField.getText().isEmpty() ? oldBirthday : birthdayField.getText();
+
                 String sql = "UPDATE students SET fullname = ?, birthday = ? WHERE id = ?";
+
                 PreparedStatement execute = conn.prepareStatement(sql);
                 execute.setString(1, newFullName);
                 execute.setString(2, newBirthday);
@@ -109,14 +129,16 @@ public class student_message implements SocketServerService, StudentService, Uti
 
                 tableModel.setValueAt(newFullName, selectedRow, 1);
                 tableModel.setValueAt(newBirthday, selectedRow, 2);
+                tableModel.setValueAt(idField.getText(), selectedRow, 3);
+
             } catch (SQLException e) {
-                e.printStackTrace();
+                throw e;
             }
         }
     }
 
     @Override
-    public void deleteById(DefaultTableModel tableModel, JTextField idField, JTable studentTable) {
+    public void deleteStudentById(DefaultTableModel tableModel, JTextField idField, JTable studentTable) {
         Connection conn = dbConfig.connect_database();
         if (conn != null) {
             try {
@@ -283,4 +305,5 @@ public class student_message implements SocketServerService, StudentService, Uti
         }
         return str;
     }
+
 }

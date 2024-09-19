@@ -9,6 +9,9 @@ import java.io.PrintWriter;
 import java.net.Socket;
 
 public class ChatClientStudentGUI extends JFrame {
+
+    //GUI (Graphic user interface)
+
     private final JTextField messageField;
     private final JTextArea chatArea;
     private JButton sendButton;

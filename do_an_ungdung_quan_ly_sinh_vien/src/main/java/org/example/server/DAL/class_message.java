@@ -12,6 +12,7 @@ import java.sql.SQLException;
 
 public class class_message implements SocketServerService {
 
+    //Data access layer
 
     private MessageHandler messageHandler;
     private Socket Socket;

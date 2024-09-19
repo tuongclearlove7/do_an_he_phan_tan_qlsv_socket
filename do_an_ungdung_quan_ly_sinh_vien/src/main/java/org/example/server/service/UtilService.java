@@ -16,5 +16,4 @@ public interface UtilService extends MessageService {
     StringBuilder search(String SQL, Connection conn, String param1, String param2, String param3) throws SQLException, IOException;
     StringBuilder search(String SQL, Connection conn, String param1, String param2) throws SQLException, IOException;
     StringBuilder search(String SQL, Connection conn, String param1) throws SQLException, IOException;
-
 }

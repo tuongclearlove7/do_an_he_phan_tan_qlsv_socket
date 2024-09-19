@@ -7,22 +7,47 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public interface StudentService {
-    void create(
+
+    void createStudentEvent(
+            DefaultTableModel tableModel,
+            JTextField idField,
+            JTextField fullnameField,
+            JTextField birthdayField,
+            Runnable runnable
+    );
+
+    void updateStudentEvent(
+            DefaultTableModel tableModel,
+            JTextField idField,
+            JTextField fullnameField,
+            JTextField birthdayField,
+            JTable studentTable,
+            Runnable runnable
+    );
+
+    void deleteStudentEvent(
+            DefaultTableModel tableModel,
+            JTextField idField,
+            JTable studentTable,
+            Runnable runnable
+    );
+
+    void createStudent(
             DefaultTableModel tableModel,
             JTextField idField,
             JTextField fullnameField,
             JTextField birthdayField
-    );
+    ) throws SQLException;
 
-    void updateById(
+    void updateStudentById(
             DefaultTableModel tableModel,
             JTextField idField,
             JTextField fullnameField,
             JTextField birthdayField,
             JTable studentTable
-    );
+    ) throws SQLException;
 
-    void deleteById(
+    void deleteStudentById(
             DefaultTableModel tableModel,
             JTextField idField,
             JTable studentTable

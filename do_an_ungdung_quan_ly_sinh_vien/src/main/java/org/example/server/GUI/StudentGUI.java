@@ -2,6 +2,7 @@ package org.example.server.GUI;
 
 import org.example.server.config.DatabaseConfig;
 import org.example.server.service.MessageService;
+import org.example.server.service.event.UtilEvent;
 import org.example.server.service.handle.MessageHandler;
 import org.example.server.service.handle.StudentHandler;
 import org.example.server.socket.Socket;
@@ -16,6 +17,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 
 public class StudentGUI extends JFrame {
+
+    //GUI (Graphic user interface)
     private final JTextField idField;
     private final JTextField fullnameField;
     private final JTextField birthdayField;
@@ -28,8 +31,8 @@ public class StudentGUI extends JFrame {
     private final Socket Socket;
     private final MessageHandler messageHandler;
     private final StudentHandler studentHandler;
-    private MessageService messageService;
-
+    private final MessageService messageService;
+    private final UtilEvent utilEvent;
 
     public StudentGUI() throws IOException {
 
@@ -43,6 +46,7 @@ public class StudentGUI extends JFrame {
         Socket = new Socket();
         messageHandler = new MessageHandler();
         studentHandler = new StudentHandler();
+        utilEvent = new UtilEvent();
         messageService = new MessageService() {};
         messageService.initialMessage(str.toString());
         this.socketInitial();
@@ -113,92 +117,22 @@ public class StudentGUI extends JFrame {
         buttonPanel.add(clearButton);
         add(buttonPanel, BorderLayout.EAST);
 
-        classButton.addActionListener(e -> {
-            ClassGUI classWindow = new ClassGUI();
-            classWindow.setVisible(true);
+        classButton.addActionListener(e -> {utilEvent.classGUIEvent();});
+        clearButton.addActionListener(e -> {utilEvent.clearEvent(messageField,str);});
+        searchButton.addActionListener( e -> {utilEvent.searchEvent(searchField);});
+        sendButton.addActionListener(e -> {utilEvent.sendEvent(messageSendField, Socket);});
+        loadButton.addActionListener(e -> {utilEvent.reloads(tableModel);});
+        addButton.addActionListener(e -> {studentHandler.createStudentEvent(
+                tableModel, idField, fullnameField, birthdayField, this::clearFields
+            );
         });
-
-        clearButton.addActionListener(e -> {
-            messageField.setText("");
+        updateButton.addActionListener(e -> {studentHandler.updateStudentEvent(
+                tableModel, idField, fullnameField, birthdayField, studentTable, this::clearFields
+            );
         });
-
-        searchButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String search = searchField.getText();
-                Connection conn = dbConfig.connect_database();
-                try {
-                    messageField.append("Your search: "+ search);
-                    messageField.append(
-                        String.valueOf(studentHandler.findById(null, conn, search))
-                    );
-                    messageField.append(
-                        String.valueOf(studentHandler.search(null, conn, search))
-                    );
-                } catch (SQLException | IOException ex) {
-                    throw new RuntimeException(ex);
-                }
-            }
-        });
-
-        sendButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String message = messageSendField.getText();
-                messageField.append("You: "+message + "\n");
-                if (message != null && !message.isEmpty()) {
-                    Socket.sendMessageToClient(message);
-                }
-            }
-        });
-
-        loadButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                studentHandler.refesh(tableModel);
-            }
-        });
-
-        addButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                studentHandler.create(
-                    tableModel,
-                    idField,
-                    fullnameField,
-                    birthdayField
-                );
-                studentHandler.refesh(tableModel);
-                clearFields();
-            }
-        });
-
-        updateButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                studentHandler.updateById(
-                    tableModel,
-                    idField,
-                    fullnameField,
-                    birthdayField,
-                    studentTable
-                );
-                studentHandler.refesh(tableModel);
-                clearFields();
-            }
-        });
-
-        deleteButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                    studentHandler.deleteById(
-                    tableModel,
-                    idField,
-                    studentTable
-                );
-                studentHandler.refesh(tableModel);
-                clearFields();
-            }
+        deleteButton.addActionListener(e -> {studentHandler.deleteStudentEvent(
+                tableModel, idField, studentTable, this::clearFields
+            );
         });
     }
 

@@ -2,6 +2,7 @@ package org.example.server.service.handle;
 
 import org.example.server.DAL.student_message;
 import org.example.server.config.DatabaseConfig;
+import org.example.server.service.MessageService;
 import org.example.server.service.StudentService;
 import org.example.server.service.UtilService;
 
@@ -13,13 +14,15 @@ import java.util.Objects;
 
 public class StudentHandler implements UtilService, StudentService {
 
+    //Business logic layer
     private final DatabaseConfig dbConfig;
     private final student_message student_message;
-
+    MessageService messageService;
 
     public StudentHandler() {
         student_message = new student_message();
         dbConfig = new DatabaseConfig();
+        messageService = new MessageService() {};
     }
 
     @Override
@@ -34,18 +37,7 @@ public class StudentHandler implements UtilService, StudentService {
 
 
     @Override
-    public void create(
-            DefaultTableModel tableModel,
-            JTextField idField,
-            JTextField fullnameField,
-            JTextField birthdayField
-    ) {
-        student_message.create(tableModel, idField,fullnameField, birthdayField);
-    }
-
-    @Override
     public StringBuilder findById(String SQL, Connection conn, String param) throws SQLException, IOException {
-
         String message = String.valueOf(student_message.findById(SQL, conn, param));
         if(message.isEmpty()){
             return new StringBuilder();
@@ -76,24 +68,66 @@ public class StudentHandler implements UtilService, StudentService {
     }
 
     @Override
-    public void updateById(
+    public void createStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, Runnable runnable) {
+        try{
+            if(idField.getText().isEmpty()){
+                messageService.initialMessage("\nVui lòng nhập vào ID!\n");
+                return;
+            }
+            createStudent(tableModel, idField,fullnameField, birthdayField);
+            refesh(tableModel);
+        }catch (Exception error){
+            System.err.println("CREATE ERRROR: " + error);
+        }
+        runnable.run();
+    }
+
+    @Override
+    public void updateStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, JTable studentTable, Runnable runnable) {
+        try{
+            updateStudentById(tableModel, idField, fullnameField, birthdayField, studentTable);
+            refesh(tableModel);
+            runnable.run();
+        }catch (Exception error){
+            messageService.initialMessage("\nVui lòng nhập vào đúng đinh dạng tuổi!\n");
+        }
+    }
+
+    @Override
+    public void deleteStudentEvent(DefaultTableModel tableModel, JTextField idField, JTable studentTable, Runnable runnable) {
+        try{
+            deleteStudentById(tableModel, idField, studentTable);
+            refesh(tableModel);
+        }catch (Exception error){
+            System.err.println("DELETE ERRROR: " + error);
+        }
+        runnable.run();
+    }
+
+    @Override
+    public void createStudent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField) throws SQLException {
+        student_message.createStudent(tableModel, idField,fullnameField, birthdayField);
+    }
+
+    @Override
+    public void updateStudentById(
             DefaultTableModel tableModel,
             JTextField idField,
             JTextField fullnameField,
             JTextField birthdayField,
             JTable studentTable
-    ) {
-        student_message.updateById(tableModel, idField, fullnameField, birthdayField, studentTable);
+    ) throws SQLException {
+        student_message.updateStudentById(tableModel, idField, fullnameField, birthdayField, studentTable);
     }
 
 
     @Override
     @Transactional
-    public void deleteById(
+    public void deleteStudentById(
             DefaultTableModel tableModel,
             JTextField idField,
             JTable studentTable
     ) {
-        student_message.deleteById(tableModel, idField, studentTable);
+        student_message.deleteStudentById(tableModel, idField, studentTable);
     }
 }
