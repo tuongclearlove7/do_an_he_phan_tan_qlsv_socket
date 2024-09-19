@@ -1,5 +1,7 @@
 package org.example.server.DAL;
 
+import org.example.server.DAL.model.Student;
+import org.example.server.DAL.repository.StudentRepository;
 import org.example.server.config.DatabaseConfig;
 import org.example.server.service.StudentService;
 import org.example.server.service.UtilService;
@@ -12,38 +14,28 @@ import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.sql.*;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class student_message implements SocketServerService, StudentService, UtilService {
 
     //Data access layer
-
-    private Socket Socket;
     private MessageHandler messageHandler;
-    private DatabaseConfig dbConfig;
+    private final DatabaseConfig dbConfig;
+    private final StudentRepository studentRepository;
 
 
     public student_message(MessageHandler messageHandler) {
         this.messageHandler = messageHandler;
+        this.dbConfig = new DatabaseConfig();
+        this.studentRepository = new StudentRepository();
     }
 
     public student_message(){
         dbConfig = new DatabaseConfig();
-    }
-
-
-    @Override
-    public void handleMessage(String message) {
-
-    }
-
-    @Override
-    public void listenForMessages() {
-
-    }
-
-    @Override
-    public void sendMessageToClient(String response) {
-
+        studentRepository = new StudentRepository();
     }
 
     @Override
@@ -52,6 +44,7 @@ public class student_message implements SocketServerService, StudentService, Uti
         preparedStatement.setString(1, param);
         ResultSet resultSet = preparedStatement.executeQuery();
         StringBuilder str = new StringBuilder();
+        List<Student> studentList = new ArrayList<>();
 
         while (resultSet.next()) {
             String id = resultSet.getString("id");
@@ -67,6 +60,36 @@ public class student_message implements SocketServerService, StudentService, Uti
             .append(birthday).append(", Code: ").append(code);
         }
         messageHandler.sendMessageToClient(String.valueOf(str));
+    }
+
+    @Override
+    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+        List<Student> studentByIdList = findById("", conn, param, new Student());
+        List<Student> searchStudents;
+
+        if(Objects.equals(param, "all")){
+            param = "";
+            searchStudents = searchStudent("", conn, param, new Student());
+            if(!searchStudents.isEmpty()){
+                messageHandler.sendMessageToClient(searchStudents.toString());
+                return;
+            }
+        }
+        if(param.isEmpty()){
+            return;
+        }
+        try{
+            if(!studentByIdList.isEmpty()){
+                messageHandler.sendMessageToClient(studentByIdList.toString());
+            }
+            return;
+        }catch (Exception error){
+            System.err.println("studentByIdList: " + error);
+        }
+        searchStudents = searchStudent("", conn, param, new Student());
+        if(!searchStudents.isEmpty()){
+            messageHandler.sendMessageToClient(searchStudents.toString());
+        }
     }
 
     @Override
@@ -90,18 +113,67 @@ public class student_message implements SocketServerService, StudentService, Uti
     }
 
     @Override
-    public void createStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, Runnable runnable) {
+    public List<Student> findById(String SQL, Connection conn, String param, Student student) throws SQLException, IOException {
 
+        System.err.println("running...");
+        SQL = "SELECT * FROM students WHERE students.code = ?";
+        List <Student> studentList = new ArrayList<>();
+        try {
+            PreparedStatement execute = conn.prepareStatement(SQL, ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            execute.setString(1, param);
+            ResultSet resultSet = execute.executeQuery();
+
+            if(resultSet.next()){
+                resultSet.beforeFirst();
+
+                while (resultSet.next()) {
+                    String id = resultSet.getString("id");
+                    String fullname = resultSet.getString("fullname");
+                    String birthday = resultSet.getString("birthday");
+                    String code = resultSet.getString("code");
+                    studentList.add(new Student(id, fullname, birthday, code));
+                }
+                resultSet.close();
+                execute.close();
+                System.out.println(studentList);
+                return studentList;
+            }
+        }catch (Exception error){
+            System.err.println("ERROR database: " + error);
+        }
+        return null;
     }
 
     @Override
-    public void updateStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, JTable studentTable, Runnable runnable) {
+    public List<Student> searchStudent(String SQL, Connection conn, String param, Student student) throws SQLException, IOException {
 
-    }
+        List <Student> studentList = new ArrayList<>();
+        List <Student> studentStaticList = studentRepository.studentStaticRepositories();
+        StringBuilder query = new StringBuilder("SELECT * FROM students WHERE");
+        query.append(" students.fullname LIKE ?");
+        try {
+            PreparedStatement execute = conn.prepareStatement(query.toString(), ResultSet.TYPE_SCROLL_INSENSITIVE, ResultSet.CONCUR_READ_ONLY);
+            int index = 1;
+            execute.setString(index++, "%" + param + "%");
+            ResultSet resultSet = execute.executeQuery();
 
-    @Override
-    public void deleteStudentEvent(DefaultTableModel tableModel, JTextField idField, JTable studentTable, Runnable runnable) {
-
+            if(resultSet.next()){
+                resultSet.beforeFirst();
+                while (resultSet.next()) {
+                    String id = resultSet.getString("id");
+                    String fullname = resultSet.getString("fullname");
+                    String birthday = resultSet.getString("birthday");
+                    String code = resultSet.getString("code");
+                    studentList.add(new Student(id, fullname, birthday, code));
+                }
+                resultSet.close();
+                execute.close();
+            }
+            return studentList;
+        }catch (Exception error){
+            System.err.println("ERROR database: " + error);
+        }
+        return filterStudent(studentStaticList, param);
     }
 
     @Override
@@ -157,6 +229,18 @@ public class student_message implements SocketServerService, StudentService, Uti
     }
 
     @Override
+    public List<Student> filterStudent(List<Student> studentList, String param) {
+        if(param.isEmpty()){
+            return studentList;
+        }
+        return studentList.stream()
+            .filter(student -> student.getCode()
+            .equalsIgnoreCase(param) || student.getFullname()
+            .equalsIgnoreCase(param))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public void reloads(DefaultTableModel tableModel) {
 
         Connection conn = dbConfig.connect_database();
@@ -164,9 +248,9 @@ public class student_message implements SocketServerService, StudentService, Uti
             try {
                 String sql = "SELECT * FROM students";
                 Statement execute = conn.createStatement();
-                ResultSet rs = execute.executeQuery(sql);
+                ResultSet data = execute.executeQuery(sql);
 
-                ResultSetMetaData metaData = rs.getMetaData();
+                ResultSetMetaData metaData = data.getMetaData();
                 int columnCount = metaData.getColumnCount();
                 String[] columnNames = new String[columnCount];
                 for (int i = 1; i <= columnCount; i++) {
@@ -174,22 +258,34 @@ public class student_message implements SocketServerService, StudentService, Uti
                 }
                 tableModel.setColumnIdentifiers(columnNames);
 
-                while (rs.next()) {
+                while (data.next()) {
                     Object[] row = new Object[columnCount];
                     for (int i = 1; i <= columnCount; i++) {
-                        row[i - 1] = rs.getObject(i);
+                        row[i - 1] = data.getObject(i);
                     }
                     tableModel.addRow(row);
                 }
-
             } catch (SQLException e) {
                 e.printStackTrace();
+            }
+        }else{
+            String[] columnNames = {"id", "fullname", "birthday", "code"};
+            List <Student> studentStaticList = studentRepository.studentStaticRepositories();
+
+            tableModel.setColumnIdentifiers(columnNames);
+            for (Student student : studentStaticList) {
+                Object[] row = new Object[columnNames.length];
+                row[0] = student.getId();
+                row[1] = student.getFullname();
+                row[2] = student.getBirthday();
+                row[3] = student.getCode();
+                tableModel.addRow(row);
             }
         }
     }
 
     @Override
-    public void refesh(DefaultTableModel tableModel) {
+    public void refresh(DefaultTableModel tableModel) {
         tableModel.setRowCount(0);
         reloads(tableModel);
     }
@@ -208,40 +304,6 @@ public class student_message implements SocketServerService, StudentService, Uti
             String birthday = resultSet.getString("birthday");
             String code = resultSet.getString("code");
             str.append("\nKết quả tìm kếm thông tin theo ID của sinh viên ")
-            .append(fullname)
-            .append("\n")
-            .append("ID: ")
-            .append(id).append(", Fullname: ")
-            .append(fullname).append(", Birthday: ")
-            .append(birthday).append(", Code: ")
-            .append(code)
-            .append("\n");
-        }
-        return str;
-    }
-
-    @Override
-    public StringBuilder search(String SQL, Connection conn, String param1, String param2, String param3) throws SQLException, IOException {
-        SQL = "SELECT * FROM students WHERE students.code = ?";
-        StringBuilder query = new StringBuilder("SELECT * FROM students WHERE 1=1");
-        query.append(" OR students.code = ?");
-        query.append(" OR students.fullname LIKE ?");
-        query.append(" OR students.birthday LIKE ?");
-
-        PreparedStatement execute = conn.prepareStatement(query.toString());
-        int index = 1;
-        execute.setString(index++, "%" + param1 + "%");
-        execute.setString(index++, "%" + param2 + "%");
-        execute.setString(index++, "%" + param3 + "%");
-        ResultSet resultSet = execute.executeQuery();
-        StringBuilder str = new StringBuilder();
-
-        while (resultSet.next()) {
-            String id = resultSet.getString("id");
-            String fullname = resultSet.getString("fullname");
-            String birthday = resultSet.getString("birthday");
-            String code = resultSet.getString("code");
-            str.append("\nKết quả tìm kếm thông tin của sinh viên ")
             .append(fullname)
             .append("\n")
             .append("ID: ")
@@ -306,4 +368,29 @@ public class student_message implements SocketServerService, StudentService, Uti
         return str;
     }
 
+    @Override
+    public StringBuilder search(String SQL, Connection conn, String param1, String param2, String param3) throws SQLException, IOException {
+        return null;
+    }
+
+    @Override
+    public void handleMessage(String message) {}
+
+    @Override
+    public void listenForMessages() {}
+
+    @Override
+    public void sendMessageToClient(String response) {}
+
+    @Override
+    public void createStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, Runnable runnable) {}
+
+    @Override
+    public void updateStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, JTable studentTable, Runnable runnable) {}
+
+    @Override
+    public void deleteStudentEvent(DefaultTableModel tableModel, JTextField idField, JTable studentTable, Runnable runnable) {}
+
+    @Override
+    public void searchEvent(JTextField searchField) {}
 }

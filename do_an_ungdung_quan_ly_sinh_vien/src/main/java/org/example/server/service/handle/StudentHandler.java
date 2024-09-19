@@ -1,5 +1,6 @@
 package org.example.server.service.handle;
 
+import org.example.server.DAL.model.Student;
 import org.example.server.DAL.student_message;
 import org.example.server.config.DatabaseConfig;
 import org.example.server.service.MessageService;
@@ -10,6 +11,8 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.sql.*;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
 
 public class StudentHandler implements UtilService, StudentService {
@@ -22,7 +25,12 @@ public class StudentHandler implements UtilService, StudentService {
     public StudentHandler() {
         student_message = new student_message();
         dbConfig = new DatabaseConfig();
-        messageService = new MessageService() {};
+        messageService = new MessageService() {
+            @Override
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
+            }
+        };
     }
 
     @Override
@@ -31,10 +39,9 @@ public class StudentHandler implements UtilService, StudentService {
     }
 
     @Override
-    public void refesh(DefaultTableModel tableModel) {
-        student_message.refesh(tableModel);
+    public void refresh(DefaultTableModel tableModel) {
+        student_message.refresh(tableModel);
     }
-
 
     @Override
     public StringBuilder findById(String SQL, Connection conn, String param) throws SQLException, IOException {
@@ -43,6 +50,16 @@ public class StudentHandler implements UtilService, StudentService {
             return new StringBuilder();
         }
         return student_message.findById(SQL, conn, param).append("\n");
+    }
+
+    @Override
+    public List<Student> findById(String SQL, Connection conn, String param, Student student) throws SQLException, IOException {
+        return student_message.findById(SQL, conn, param, student);
+    }
+
+    @Override
+    public List<Student> searchStudent(String SQL, Connection conn, String param, Student student) throws SQLException, IOException {
+        return student_message.searchStudent(SQL, conn, param, new Student()).stream().toList();
     }
 
     @Override
@@ -68,6 +85,47 @@ public class StudentHandler implements UtilService, StudentService {
     }
 
     @Override
+    public void searchEvent(JTextField searchField) {
+        String search = searchField.getText();
+        Connection conn = dbConfig.connect_database();
+        try {
+            messageService.initialMessage(
+                "Your search: "+ search
+            );
+            if(Objects.equals(search, "all")){
+                search = "";
+                List<Student> studentList = this.searchStudent(null, conn, search, new Student());
+                messageService.initialMessage(
+                    "\nKết quả tìm kiếm danh sách sinh viên: \n"
+                );
+                messageService.initialMessage(
+                    studentList.toString()
+                );
+            }
+            if(Objects.equals(search, "")){
+                return;
+            }
+            try{
+                List<Student> students = this.findById(null, conn, search, new Student());
+                if(!students.isEmpty()){
+                    messageService.initialMessage(
+                        "\nKết quả tìm kiếm theo ID của sinh viên:\n" + students
+                    );
+                }
+            }catch (Exception exception){
+                System.err.println("ERROR: " + exception);
+            }
+            List<Student> studentList = this.searchStudent(null, conn, search, new Student());
+            if(!studentList.isEmpty()){
+                messageService.initialMessage(
+                    "\nKết quả tìm kiếm theo tên hoặc ID của sinh viên:\n"+ studentList
+                );
+            }
+        } catch (SQLException | IOException ex) {
+            throw new RuntimeException(ex);
+        }
+    }
+    @Override
     public void createStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, Runnable runnable) {
         try{
             if(idField.getText().isEmpty()){
@@ -75,7 +133,7 @@ public class StudentHandler implements UtilService, StudentService {
                 return;
             }
             createStudent(tableModel, idField,fullnameField, birthdayField);
-            refesh(tableModel);
+            refresh(tableModel);
         }catch (Exception error){
             System.err.println("CREATE ERRROR: " + error);
         }
@@ -86,7 +144,7 @@ public class StudentHandler implements UtilService, StudentService {
     public void updateStudentEvent(DefaultTableModel tableModel, JTextField idField, JTextField fullnameField, JTextField birthdayField, JTable studentTable, Runnable runnable) {
         try{
             updateStudentById(tableModel, idField, fullnameField, birthdayField, studentTable);
-            refesh(tableModel);
+            refresh(tableModel);
             runnable.run();
         }catch (Exception error){
             messageService.initialMessage("\nVui lòng nhập vào đúng đinh dạng tuổi!\n");
@@ -97,7 +155,7 @@ public class StudentHandler implements UtilService, StudentService {
     public void deleteStudentEvent(DefaultTableModel tableModel, JTextField idField, JTable studentTable, Runnable runnable) {
         try{
             deleteStudentById(tableModel, idField, studentTable);
-            refesh(tableModel);
+            refresh(tableModel);
         }catch (Exception error){
             System.err.println("DELETE ERRROR: " + error);
         }
@@ -129,5 +187,15 @@ public class StudentHandler implements UtilService, StudentService {
             JTable studentTable
     ) {
         student_message.deleteStudentById(tableModel, idField, studentTable);
+    }
+
+    @Override
+    public List<Student> filterStudent(List<Student> studentList, String code) {
+        return null;
+    }
+
+    @Override
+    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
     }
 }
