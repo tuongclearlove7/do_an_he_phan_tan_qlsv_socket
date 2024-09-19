@@ -47,7 +47,12 @@ public class StudentGUI extends JFrame {
         messageHandler = new MessageHandler();
         studentHandler = new StudentHandler();
         utilEvent = new UtilEvent();
-        messageService = new MessageService() {};
+        messageService = new MessageService() {
+            @Override
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
+            }
+        };
         messageService.initialMessage(str.toString());
         this.socketInitial();
 
@@ -98,7 +103,7 @@ public class StudentGUI extends JFrame {
         add(messagePanel, BorderLayout.SOUTH);
 
         JPanel buttonPanel = new JPanel();
-        JButton loadButton = new JButton("Load");
+        JButton refreshButton = new JButton("Refresh");
         JButton addButton = new JButton("Add");
         JButton updateButton = new JButton("Update");
         JButton deleteButton = new JButton("Delete");
@@ -110,8 +115,7 @@ public class StudentGUI extends JFrame {
         buttonPanel.add(addButton);
         buttonPanel.add(updateButton);
         buttonPanel.add(deleteButton);
-        buttonPanel.add(loadButton);
-        buttonPanel.add(classButton);
+        buttonPanel.add(refreshButton);
         buttonPanel.add(sendButton);
         buttonPanel.add(searchButton);
         buttonPanel.add(clearButton);
@@ -119,9 +123,10 @@ public class StudentGUI extends JFrame {
 
         classButton.addActionListener(e -> {utilEvent.classGUIEvent();});
         clearButton.addActionListener(e -> {utilEvent.clearEvent(messageField,str);});
-        searchButton.addActionListener( e -> {utilEvent.searchEvent(searchField);});
         sendButton.addActionListener(e -> {utilEvent.sendEvent(messageSendField, Socket);});
-        loadButton.addActionListener(e -> {utilEvent.reloads(tableModel);});
+
+        searchButton.addActionListener( e -> {studentHandler.searchEvent(searchField);});
+        refreshButton.addActionListener(e -> {studentHandler.refresh(tableModel);});
         addButton.addActionListener(e -> {studentHandler.createStudentEvent(
                 tableModel, idField, fullnameField, birthdayField, this::clearFields
             );

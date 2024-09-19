@@ -38,6 +38,11 @@ public class MessageHandler implements SocketServerService {
         socket1 = new Socket();
         messageService = new MessageService() {
             @Override
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
+            }
+
+            @Override
             public void initialMessage(String message) {
                 MessageService.super.initialMessage(message);
             }
@@ -56,10 +61,9 @@ public class MessageHandler implements SocketServerService {
             String message;
             while ((message = reader.readLine()) != null) {
                 System.err.println("The message received from client: " + message);
-                String SQL = "SELECT * FROM students WHERE students.code = ?";
                 String SQL2 = "SELECT * FROM classes WHERE classes.id = ?";
                 this.handleMessage(message);
-                student_message.handleClientMessage(SQL, conn, message);
+                student_message.handleClientMessageSearch(conn, message);
                 class_message.handleClientMessage(SQL2, conn, message);
             }
         } catch (IOException e) {
@@ -78,13 +82,24 @@ public class MessageHandler implements SocketServerService {
 
     @Override
     public void handleMessage(String message) {
+
+        String[] options = {
+            "Tìm kiếm theo mã sinh viên nhập: SV001",
+            "Tìm kiếm tên sinh viên nhập: Nguyen",
+            "Hiển thị danh sách sinh viên nhập: all",
+            "Xóa tin nhắn nhập: clear"
+        };
         StringBuilder str = new StringBuilder();
-        str.append("Xin chào bạn muốn gì? ")
-        .append("\nOption 1: Nhập mã sinh viên ")
-        .append("của bạn vào chat để xem thông tin của bạn example: SV001 ")
-        .append("\nOption 2: Nhập mã lớp của bạn để ")
-        .append("xem thông tin lớp example: C001")
-        .append("");
+        str.append("Xin chào bạn muốn gì?")
+        .append("\nNhập vào ô chat để tìm kiếm thông tin sinh viên!\n");
+        for(int i = 0; i < options.length; i++){
+            str.append("Option[")
+            .append((i + 1))
+            .append("]: ")
+            .append(options[i])
+            .append("\n");
+        }
+
         if(message.isEmpty()){
             sendMessageToClient(String.valueOf(str));
         }else {

@@ -21,7 +21,12 @@ public class UtilEvent implements MessageService, UtilService {
     DatabaseConfig dbConfig;
 
     public UtilEvent() {
-        messageService = new MessageService() {};
+        messageService = new MessageService() {
+            @Override
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
+            }
+        };
         studentHandler = new StudentHandler();
         dbConfig = new DatabaseConfig();
     }
@@ -39,23 +44,10 @@ public class UtilEvent implements MessageService, UtilService {
         messageService.initialMessage(str.toString());
     }
 
+    @Override
     public void searchEvent(JTextField searchField){
 
-        String search = searchField.getText();
-        Connection conn = dbConfig.connect_database();
-        try {
-            messageService.initialMessage(
-                    "Your search: "+ search
-            );
-            messageService.initialMessage(
-                    String.valueOf(studentHandler.findById(null, conn, search))
-            );
-            messageService.initialMessage(
-                    String.valueOf(studentHandler.search(null, conn, search))
-            );
-        } catch (SQLException | IOException ex) {
-            throw new RuntimeException(ex);
-        }
+
     }
 
     public void classGUIEvent(){
@@ -65,12 +57,10 @@ public class UtilEvent implements MessageService, UtilService {
 
     @Override
     public void reloads(DefaultTableModel tableModel) {
-        studentHandler.refesh(tableModel);
     }
 
     @Override
-    public void refesh(DefaultTableModel tableModel) {
-
+    public void refresh(DefaultTableModel tableModel) {
     }
 
     @Override
@@ -91,5 +81,10 @@ public class UtilEvent implements MessageService, UtilService {
     @Override
     public StringBuilder search(String SQL, Connection conn, String param1) throws SQLException, IOException {
         return null;
+    }
+
+    @Override
+    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
     }
 }
