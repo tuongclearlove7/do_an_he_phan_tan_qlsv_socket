@@ -47,6 +47,8 @@ public class StudentGUI extends JFrame {
         messageHandler = new MessageHandler();
         studentHandler = new StudentHandler();
         utilEvent = new UtilEvent();
+
+
         messageService = new MessageService() {
             @Override
             public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
@@ -156,17 +158,17 @@ public class StudentGUI extends JFrame {
         birthdayField.setText("");
     }
 
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(new Runnable() {
-            @Override
-            public void run() {
-                try {
-                    new StudentGUI().setVisible(true);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                }
-            }
-        });
-    }
+//    public static void main(String[] args) {
+//        SwingUtilities.invokeLater(new Runnable() {
+//            @Override
+//            public void run() {
+//                try {
+//                    new StudentGUI().setVisible(true);
+//                } catch (IOException e) {
+//                    throw new RuntimeException(e);
+//                }
+//            }
+//        });
+//    }
 }
 
