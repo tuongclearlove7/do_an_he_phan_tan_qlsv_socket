@@ -43,21 +43,23 @@ public class class_message implements SocketServerService {
 
     @Override
     public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {
-        PreparedStatement preparedStatement = conn.prepareStatement(SQL);
-        preparedStatement.setString(1, param);
-        ResultSet resultSet = preparedStatement.executeQuery();
-        StringBuilder str = new StringBuilder();
+        if(conn!=null){
+            PreparedStatement preparedStatement = conn.prepareStatement(SQL);
+            preparedStatement.setString(1, param);
+            ResultSet resultSet = preparedStatement.executeQuery();
+            StringBuilder str = new StringBuilder();
 
-        while (resultSet.next()) {
-            String id = resultSet.getString("id");
-            String name = resultSet.getString("name");
-            str.append("Thông tin của lớp ")
-            .append(name)
-            .append("\n")
-            .append("ID: ")
-            .append(id).append(", Class name: ")
-            .append(name);
+            while (resultSet.next()) {
+                String id = resultSet.getString("id");
+                String name = resultSet.getString("name");
+                str.append("Thông tin của lớp ")
+                        .append(name)
+                        .append("\n")
+                        .append("ID: ")
+                        .append(id).append(", Class name: ")
+                        .append(name);
+            }
+            messageHandler.sendMessageToClient(String.valueOf(str));
         }
-        messageHandler.sendMessageToClient(String.valueOf(str));
     }
 }

@@ -4,6 +4,7 @@ import org.example.server.config.DatabaseConfig;
 import org.example.server.GUI.StudentGUI;
 import org.example.server.DAL.class_message;
 import org.example.server.config.EnvConfig;
+import org.example.server.service.MessageService;
 import org.example.server.service.handle.MessageHandler;
 import org.example.server.service.SocketServerService;
 import org.example.server.DAL.student_message;
@@ -26,6 +27,7 @@ public class Socket implements SocketServerService {
     private student_message student_message;
     private final MessageHandler messageHandler;
     private final EnvConfig envConfig;
+    MessageService messageService;
 
     public Socket(){
         messageHandler = new MessageHandler();
@@ -33,6 +35,12 @@ public class Socket implements SocketServerService {
         class_message = new class_message();
         student_message = new student_message();
         envConfig = new EnvConfig();
+        messageService = new MessageService() {
+            @Override
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
+            }
+        };
 
     }
     public void connect_socket_server() {
@@ -45,7 +53,7 @@ public class Socket implements SocketServerService {
                 reader = new BufferedReader(new InputStreamReader(socket1.getInputStream()));
                 writer = new BufferedWriter(new OutputStreamWriter(socket1.getOutputStream()));
                 System.err.println("Server Socket connected...");
-                StudentGUI.messageField.append("Client connected server chat..." + "\n");
+                messageService.initialMessage("\nClient connected server chat..." + "\n");
                 messageHandler.settings(reader, writer);
                 new Thread(messageHandler::listenForMessages).start();
             }

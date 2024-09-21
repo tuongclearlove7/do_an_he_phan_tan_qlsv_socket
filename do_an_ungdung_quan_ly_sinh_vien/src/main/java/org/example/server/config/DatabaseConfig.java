@@ -14,7 +14,6 @@ import java.sql.SQLException;
 
 public class DatabaseConfig {
 
-
     private String connectString = EnvConfig.getDatabaseUrl();
     private String username = EnvConfig.getDatabaseUsername();
     private String password = EnvConfig.getDatabasePassword();
@@ -27,7 +26,12 @@ public class DatabaseConfig {
     }
 
     public DatabaseConfig(){
-        this.messageService = new MessageService() {};
+        this.messageService = new MessageService() {
+            @Override
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
+            }
+        };
     }
 
     public String getConnectString() {
