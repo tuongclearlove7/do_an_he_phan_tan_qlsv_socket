@@ -1,5 +1,6 @@
 package org.example.server.DAL;
 
+import org.example.server.service.MessageService;
 import org.example.server.service.handle.MessageHandler;
 import org.example.server.service.SocketServerService;
 import org.example.server.socket.Socket;
@@ -10,7 +11,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-public class class_message implements SocketServerService {
+public class class_message implements MessageService {
 
     //Data access layer
 
@@ -23,22 +24,6 @@ public class class_message implements SocketServerService {
     }
 
     public class_message(){
-
-    }
-
-    @Override
-    public void handleMessage(String message) {
-
-    }
-
-    @Override
-    public void listenForMessages() {
-
-    }
-
-    @Override
-    public void sendMessageToClient(String response) {
-
     }
 
     @Override
@@ -53,13 +38,25 @@ public class class_message implements SocketServerService {
                 String id = resultSet.getString("id");
                 String name = resultSet.getString("name");
                 str.append("Thông tin của lớp ")
-                        .append(name)
-                        .append("\n")
-                        .append("ID: ")
-                        .append(id).append(", Class name: ")
-                        .append(name);
+                .append(name)
+                .append("\n")
+                .append("ID: ")
+                .append(id).append(", Class name: ")
+                .append(name);
             }
             messageHandler.sendMessageToClient(String.valueOf(str));
         }
     }
+
+    @Override
+    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {}
+
+    @Override
+    public void handleMessage(String message) {}
+
+    @Override
+    public void listenForMessages() {}
+
+    @Override
+    public void sendMessageToClient(String response) {}
 }

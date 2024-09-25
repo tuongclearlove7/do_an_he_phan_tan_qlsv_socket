@@ -3,9 +3,8 @@ package org.example.server.service.event;
 import org.example.server.GUI.ClassGUI;
 import org.example.server.config.DatabaseConfig;
 import org.example.server.service.MessageService;
-import org.example.server.service.StudentService;
 import org.example.server.service.UtilService;
-import org.example.server.service.handle.StudentHandler;
+import org.example.server.service.handle.MessageHandler;
 import org.example.server.socket.Socket;
 
 import javax.swing.*;
@@ -17,25 +16,35 @@ import java.sql.SQLException;
 public class UtilEvent implements MessageService, UtilService {
 
     MessageService messageService;
-    StudentHandler studentHandler;
+    StudentEvent studentEvent;
     DatabaseConfig dbConfig;
+    MessageHandler messageHandler;
+    Socket socket;
 
     public UtilEvent() {
         messageService = new MessageService() {
             @Override
-            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
-
-            }
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {}
+            @Override
+            public void handleMessage(String message) {}
+            @Override
+            public void listenForMessages() {}
+            @Override
+            public void sendMessageToClient(String response) {}
+            @Override
+            public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {}
         };
-        studentHandler = new StudentHandler();
+        socket = new Socket();
+        studentEvent = new StudentEvent();
         dbConfig = new DatabaseConfig();
+        messageHandler = new MessageHandler();
     }
 
     public void sendEvent(JTextField messageSendField, Socket socket){
         String message = messageSendField.getText();
         messageService.initialMessage("You: "+message + "\n");
         if (message != null && !message.isEmpty()) {
-            socket.sendMessageToClient(message);
+            socket.serverSendMessageToClient(message);
         }
     }
 
@@ -44,24 +53,18 @@ public class UtilEvent implements MessageService, UtilService {
         messageService.initialMessage(str.toString());
     }
 
-    @Override
-    public void searchEvent(JTextField searchField){
-
-
-    }
-
     public void classGUIEvent(){
-        ClassGUI classWindow = new ClassGUI();
-        classWindow.setVisible(true);
+        new ClassGUI().setVisible(true);
     }
 
     @Override
-    public void reloads(DefaultTableModel tableModel) {
-    }
+    public void searchEvent(JTextField searchField){}
 
     @Override
-    public void refresh(DefaultTableModel tableModel) {
-    }
+    public void findAll(DefaultTableModel tableModel) {}
+
+    @Override
+    public void refresh(DefaultTableModel tableModel) {}
 
     @Override
     public StringBuilder findById(String SQL, Connection conn, String param) throws SQLException, IOException {
@@ -84,7 +87,17 @@ public class UtilEvent implements MessageService, UtilService {
     }
 
     @Override
-    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {}
 
-    }
+    @Override
+    public void handleMessage(String message) {}
+
+    @Override
+    public void listenForMessages() {}
+
+    @Override
+    public void sendMessageToClient(String response) {}
+
+    @Override
+    public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {}
 }

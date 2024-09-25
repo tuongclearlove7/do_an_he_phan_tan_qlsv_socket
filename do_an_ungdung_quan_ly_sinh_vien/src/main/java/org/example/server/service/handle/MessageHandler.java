@@ -17,19 +17,17 @@ import java.net.Socket;
 import java.sql.Connection;
 import java.sql.SQLException;
 
-public class MessageHandler implements SocketServerService {
+public class MessageHandler implements MessageService {
 
     //Business logic layer
-
     private final Socket socket1;
     private BufferedReader reader;
     private BufferedWriter writer;
     private final DatabaseConfig dbConfig;
     private final class_message class_message;
     private final student_message student_message;
-
     private UtilService utilService;
-    private MessageService messageService;
+    private final MessageService messageService;
 
     public MessageHandler() {
         dbConfig = new DatabaseConfig();
@@ -38,10 +36,15 @@ public class MessageHandler implements SocketServerService {
         socket1 = new Socket();
         messageService = new MessageService() {
             @Override
-            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
-
-            }
-
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {}
+            @Override
+            public void handleMessage(String message) {}
+            @Override
+            public void listenForMessages() {}
+            @Override
+            public void sendMessageToClient(String response) {}
+            @Override
+            public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {}
             @Override
             public void initialMessage(String message) {
                 MessageService.super.initialMessage(message);
@@ -81,6 +84,11 @@ public class MessageHandler implements SocketServerService {
     }
 
     @Override
+    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+
+    }
+
+    @Override
     public void handleMessage(String message) {
 
         String[] options = {
@@ -99,7 +107,6 @@ public class MessageHandler implements SocketServerService {
             .append(options[i])
             .append("\n");
         }
-
         if(message.isEmpty()){
             sendMessageToClient(String.valueOf(str));
         }else {
@@ -109,9 +116,6 @@ public class MessageHandler implements SocketServerService {
 
     @Override
     public void sendMessageToClient(String response){
-        System.err.println("server send message..." + response);
-        System.err.println(writer);
-
         try {
             if (writer != null) {
                 writer.write(response);
@@ -124,7 +128,5 @@ public class MessageHandler implements SocketServerService {
     }
 
     @Override
-    public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException {
-
-    }
+    public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException {}
 }

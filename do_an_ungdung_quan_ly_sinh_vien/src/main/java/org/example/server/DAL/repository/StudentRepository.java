@@ -7,8 +7,7 @@ import java.util.List;
 
 public class StudentRepository {
 
-    public StudentRepository() {
-    }
+    public StudentRepository() {}
 
     public List<Student> studentStaticRepositories(){
         List<Student> studentList =new ArrayList<>();
