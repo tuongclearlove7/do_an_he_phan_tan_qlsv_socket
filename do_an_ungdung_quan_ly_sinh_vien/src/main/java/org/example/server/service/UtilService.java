@@ -11,16 +11,12 @@ import java.util.List;
 
 public interface UtilService extends MessageService {
 
-    void reloads(DefaultTableModel tableModel);
-
+    void findAll(DefaultTableModel tableModel);
     void refresh(DefaultTableModel tableModel);
-
     StringBuilder findById(String SQL, Connection conn, String param) throws SQLException, IOException;
-
     StringBuilder search(String SQL, Connection conn, String param1, String param2, String param3) throws SQLException, IOException;
     StringBuilder search(String SQL, Connection conn, String param1, String param2) throws SQLException, IOException;
     StringBuilder search(String SQL, Connection conn, String param1) throws SQLException, IOException;
-
     void searchEvent(JTextField searchField);
 
 }

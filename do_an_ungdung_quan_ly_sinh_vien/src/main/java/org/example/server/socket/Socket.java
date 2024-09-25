@@ -37,9 +37,15 @@ public class Socket implements SocketServerService {
         envConfig = new EnvConfig();
         messageService = new MessageService() {
             @Override
-            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
-
-            }
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {}
+            @Override
+            public void handleMessage(String message) {}
+            @Override
+            public void listenForMessages() {}
+            @Override
+            public void sendMessageToClient(String response) {}
+            @Override
+            public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {}
         };
 
     }
@@ -63,7 +69,16 @@ public class Socket implements SocketServerService {
     }
 
     @Override
-    public void sendMessageToClient(String response){
+    public void socketInitial() throws IOException {
+        new Thread(new Runnable() {
+            @Override
+            public void run() {
+                connect_socket_server();
+            }
+        }).start();
+    }
+
+    public void serverSendMessageToClient(String response){
         try {
             if (writer != null) {
                 writer.write(response);
@@ -75,18 +90,4 @@ public class Socket implements SocketServerService {
         }
     }
 
-    @Override
-    public void handleMessage(String message) {
-
-    }
-
-    @Override
-    public void listenForMessages() {
-
-    }
-
-    @Override
-    public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {
-
-    }
 }

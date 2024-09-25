@@ -1,4 +1,4 @@
-package org.example.server.service.handle;
+package org.example.server.service.event;
 
 import org.example.server.DAL.model.Student;
 import org.example.server.DAL.student_message;
@@ -11,31 +11,37 @@ import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.sql.*;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
-public class StudentHandler implements UtilService, StudentService {
+public class StudentEvent implements UtilService, StudentService {
 
     //Business logic layer
     private final DatabaseConfig dbConfig;
     private final student_message student_message;
     MessageService messageService;
 
-    public StudentHandler() {
+    public StudentEvent() {
         student_message = new student_message();
         dbConfig = new DatabaseConfig();
         messageService = new MessageService() {
             @Override
-            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {}
+            @Override
+            public void handleMessage(String message) {}
 
-            }
+            @Override
+            public void listenForMessages() {}
+            @Override
+            public void sendMessageToClient(String response) {}
+            @Override
+            public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {}
         };
     }
 
     @Override
-    public void reloads(DefaultTableModel tableModel) {
-        student_message.reloads(tableModel);
+    public void findAll(DefaultTableModel tableModel) {
+        student_message.findAll(tableModel);
     }
 
     @Override
@@ -180,7 +186,6 @@ public class StudentHandler implements UtilService, StudentService {
 
 
     @Override
-    @Transactional
     public void deleteStudentById(
             DefaultTableModel tableModel,
             JTextField idField,
@@ -193,9 +198,14 @@ public class StudentHandler implements UtilService, StudentService {
     public List<Student> filterStudent(List<Student> studentList, String code) {
         return null;
     }
-
     @Override
-    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
-
-    }
+    public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {}
+    @Override
+    public void handleMessage(String message) {}
+    @Override
+    public void listenForMessages() {}
+    @Override
+    public void sendMessageToClient(String response) {}
+    @Override
+    public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {}
 }

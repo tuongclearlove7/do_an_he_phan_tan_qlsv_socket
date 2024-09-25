@@ -2,10 +2,8 @@ package org.example;
 
 import org.example.client.GUI.ChatClientStudentGUI;
 import org.example.server.GUI.StudentGUI;
-
 import javax.swing.*;
 import java.io.IOException;
-
 public class RunMain {
 
     public static void main(String[] args) throws InterruptedException {

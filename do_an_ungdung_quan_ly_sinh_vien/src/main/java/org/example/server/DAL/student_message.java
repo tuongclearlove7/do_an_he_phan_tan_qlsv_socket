@@ -3,23 +3,20 @@ package org.example.server.DAL;
 import org.example.server.DAL.model.Student;
 import org.example.server.DAL.repository.StudentRepository;
 import org.example.server.config.DatabaseConfig;
+import org.example.server.service.MessageService;
 import org.example.server.service.StudentService;
 import org.example.server.service.UtilService;
 import org.example.server.service.handle.MessageHandler;
-import org.example.server.service.SocketServerService;
-import org.example.server.socket.Socket;
-
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.io.IOException;
 import java.sql.*;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-public class student_message implements SocketServerService, StudentService, UtilService {
+public class student_message implements MessageService, StudentService, UtilService {
 
     //Data access layer
     private MessageHandler messageHandler;
@@ -241,7 +238,7 @@ public class student_message implements SocketServerService, StudentService, Uti
     }
 
     @Override
-    public void reloads(DefaultTableModel tableModel) {
+    public void findAll(DefaultTableModel tableModel) {
 
         Connection conn = dbConfig.connect_database();
         if (conn != null) {
@@ -287,7 +284,7 @@ public class student_message implements SocketServerService, StudentService, Uti
     @Override
     public void refresh(DefaultTableModel tableModel) {
         tableModel.setRowCount(0);
-        reloads(tableModel);
+        findAll(tableModel);
     }
 
     @Override
@@ -369,9 +366,7 @@ public class student_message implements SocketServerService, StudentService, Uti
     }
 
     @Override
-    public StringBuilder search(String SQL, Connection conn, String param1, String param2, String param3) throws SQLException, IOException {
-        return null;
-    }
+    public StringBuilder search(String SQL, Connection conn, String param1, String param2, String param3) throws SQLException, IOException {return null;}
 
     @Override
     public void handleMessage(String message) {}

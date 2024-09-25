@@ -28,9 +28,19 @@ public class DatabaseConfig {
     public DatabaseConfig(){
         this.messageService = new MessageService() {
             @Override
-            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {
+            public void handleClientMessageSearch(Connection conn, String param) throws SQLException, IOException {}
 
-            }
+            @Override
+            public void handleMessage(String message) {}
+
+            @Override
+            public void listenForMessages() {}
+
+            @Override
+            public void sendMessageToClient(String response) {}
+
+            @Override
+            public void handleClientMessage(String SQL, Connection conn, String param) throws SQLException, IOException {}
         };
     }
 
@@ -49,7 +59,6 @@ public class DatabaseConfig {
     public Connection connect_database() {
         try {
             messageService.initialMessage("\nConnection: " + getConnectString() + " database\n");
-
             System.out.println("Connection: "+getConnectString());
             return DriverManager.getConnection(getConnectString(), getUsername(), getPassword());
         } catch (SQLException e) {
